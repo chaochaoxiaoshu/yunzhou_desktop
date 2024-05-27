@@ -7,8 +7,12 @@ import { XrayManager } from './xray'
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1000,
+    height: 625,
+    minWidth: 1000,
+    minHeight: 625,
+    maxWidth: 1000,
+    maxHeight: 625,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -50,8 +54,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  ipcMain.on('startXray', () => XrayManager.shared.startXray())
-  ipcMain.on('endXray', () => XrayManager.shared.endXray())
+  // 在此 handle 来自渲染进程的调用
+  ipcMain.handle('startXray', (_, configName) => XrayManager.shared.startXray(configName))
+  ipcMain.handle('endXray', () => XrayManager.shared.endXray())
 
   createWindow()
 

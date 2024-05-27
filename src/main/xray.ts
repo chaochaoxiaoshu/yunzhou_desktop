@@ -18,15 +18,15 @@ export class XrayManager {
 
   childProcess?: ChildProcessWithoutNullStreams
 
-  startXray(): void {
+  startXray(configName: string): void {
     if (process.platform === 'darwin') {
-      this.startXrayOnMacOS()
+      this.startXrayOnMacOS(configName)
     } else if (process.platform === 'win32') {
-      this.startXrayOnWindows()
+      this.startXrayOnWindows(configName)
     }
   }
 
-  private startXrayOnMacOS(): void {
+  private startXrayOnMacOS(configName: string): void {
     spawn('/usr/sbin/networksetup', ['-setwebproxy', 'WI-FI', '127.0.0.1', '24511'])
     spawn('/usr/sbin/networksetup', ['-setsecurewebproxy', 'WI-FI', '127.0.0.1', '24511'])
     spawn('/usr/sbin/networksetup', ['-setsocksfirewallproxy', 'WI-FI', '127.0.0.1', '24512'])
@@ -37,7 +37,7 @@ export class XrayManager {
       'resources',
       'bin',
       'xray_macos',
-      'vless_usa.json'
+      `${configName}.json`
     )
     const bat = spawn(xrayPath, ['-c', configPath])
 
@@ -56,7 +56,7 @@ export class XrayManager {
     this.childProcess = bat
   }
 
-  private startXrayOnWindows(): void {
+  private startXrayOnWindows(configName: string): void {
     spawn('powershell', [
       'Set-ItemProperty -Path',
       '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
@@ -79,7 +79,7 @@ export class XrayManager {
       'resources',
       'bin',
       'xray_windows',
-      'vless_usa.json'
+      `${configName}.json`
     )
     const bat = spawn(xrayPath, ['-c', configPath])
 
