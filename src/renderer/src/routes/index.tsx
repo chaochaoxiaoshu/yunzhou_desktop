@@ -5,7 +5,7 @@ import {
 } from '@renderer/store/acceleration'
 import Spacer from '@renderer/components/spacer'
 import Titlebar from '@renderer/components/titlebar'
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { MoveRight } from 'lucide-react'
 import { Toaster } from '@renderer/components/ui/toaster'
 import { useToast } from '@renderer/components/ui/use-toast'
@@ -15,11 +15,11 @@ import dashedI from '@renderer/assets/images/dashed_circle_f.png'
 import airplaneIcon from '@renderer/assets/images/icon_airplane.png'
 import autoIcon from '@renderer/assets/images/icon_auto_h.png'
 
-export const Route = createLazyFileRoute('/')({
+export const Route = createFileRoute('/')({
   component: Index
 })
 
-function Index(): JSX.Element {
+export function Index(): JSX.Element {
   const accelerationStore = useAccelerationStore()
   const navigate = useNavigate()
   const { toast } = useToast()

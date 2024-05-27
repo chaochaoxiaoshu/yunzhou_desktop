@@ -1,5 +1,6 @@
 import Sidebar from '@renderer/components/sidebar'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
+import { Index } from '.'
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
 export const Route = createRootRoute({
@@ -13,5 +14,6 @@ export const Route = createRootRoute({
       </div>
       {/* <TanStackRouterDevtools /> */}
     </div>
-  )
+  ),
+  notFoundComponent: Index
 })
