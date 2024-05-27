@@ -18,6 +18,28 @@ export class XrayManager {
 
   childProcess?: ChildProcessWithoutNullStreams
 
+  private getXrayPath(): string {
+    const basePath =
+      process.env.NODE_ENV === 'development'
+        ? path.resolve(__dirname, '../../resources/bin')
+        : path.resolve(app.getAppPath(), 'resources/bin').replace('app.asar', 'app.asar.unpacked')
+
+    return process.platform === 'darwin'
+      ? path.join(basePath, 'xray_macos', 'xray')
+      : path.join(basePath, 'xray_windows', 'xray')
+  }
+
+  private getConfigPath(configName: string): string {
+    const basePath =
+      process.env.NODE_ENV === 'development'
+        ? path.resolve(__dirname, '../../resources/bin')
+        : path.resolve(app.getAppPath(), 'resources/bin').replace('app.asar', 'app.asar.unpacked')
+
+    return process.platform === 'darwin'
+      ? path.join(basePath, 'xray_macos', `${configName}.json`)
+      : path.join(basePath, 'xray_windows', `${configName}.json`)
+  }
+
   startXray(configName: string): void {
     if (process.platform === 'darwin') {
       this.startXrayOnMacOS(configName)
@@ -31,15 +53,7 @@ export class XrayManager {
     spawn('/usr/sbin/networksetup', ['-setsecurewebproxy', 'WI-FI', '127.0.0.1', '24511'])
     spawn('/usr/sbin/networksetup', ['-setsocksfirewallproxy', 'WI-FI', '127.0.0.1', '24512'])
 
-    const xrayPath = path.join(app.getAppPath(), 'resources', 'bin', 'xray_macos', 'xray')
-    const configPath = path.join(
-      app.getAppPath(),
-      'resources',
-      'bin',
-      'xray_macos',
-      `${configName}.json`
-    )
-    const bat = spawn(xrayPath, ['-c', configPath])
+    const bat = spawn(this.getXrayPath(), ['-c', this.getConfigPath(configName)])
 
     bat.stdout.on('data', (data) => {
       console.log(data)
@@ -73,15 +87,7 @@ export class XrayManager {
       '-Name ProxyEnable -Value 1'
     ])
 
-    const xrayPath = path.join(app.getAppPath(), 'resources', 'bin', 'xray_windows', 'xray.exe')
-    const configPath = path.join(
-      app.getAppPath(),
-      'resources',
-      'bin',
-      'xray_windows',
-      `${configName}.json`
-    )
-    const bat = spawn(xrayPath, ['-c', configPath])
+    const bat = spawn(this.getXrayPath(), ['-c', this.getConfigPath(configName)])
 
     bat.stdout.on('data', (data) => {
       console.log(data)
