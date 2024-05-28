@@ -22,27 +22,31 @@ export default function Titlebar(props: TitlebarProps): JSX.Element {
   }
 
   return (
-    <div className="flex items-center justify-between h-14 px-4">
-      <div className="flex items-center">
-        {props.showBackButton && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8 hover:text-white hover:bg-opacity-20 rounded-lg"
-              onClick={() => router.navigate({ to: '/', replace: true })}
-            >
-              <ArrowLeft size={22} />
-            </Button>
-            <Spacer width={20} />
-          </>
-        )}
-        {titleView()}
-      </div>
-      <div className="flex items-center space-x-4">
-        <TitlebarButton icon={contactIcon} />
-        <TitlebarButton icon={emailIcon} />
-        <TitlebarButton icon={settingsIcon} />
+    <div className="relative h-14">
+      <div className="absolute top-0 bottom-0 left-0 right-0 draggable" />
+      <div className="relative flex items-center justify-between h-14 px-4">
+        <div className="flex items-center">
+          {props.showBackButton && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8 hover:text-white hover:bg-opacity-20 rounded-lg"
+                onClick={() => router.navigate({ to: '/', replace: true })}
+              >
+                <ArrowLeft size={22} />
+              </Button>
+              <Spacer width={20} />
+            </>
+          )}
+          {titleView()}
+        </div>
+        <div className="flex items-center space-x-4">
+          <TitlebarButton icon={contactIcon} />
+          <TitlebarButton icon={emailIcon} />
+          <TitlebarButton icon={settingsIcon} />
+        </div>
+        {window.electron.process.platform === 'win32' && <Spacer width={150} />}
       </div>
     </div>
   )

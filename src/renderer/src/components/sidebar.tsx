@@ -10,7 +10,12 @@ import ProfileIcon from '@renderer/components/icons/sidebar-profile'
 
 export default function Sidebar(): JSX.Element {
   return (
-    <div className="flex flex-col justify-between items-center w-[6.25rem] h-full py-8 bg-[#0B1327]">
+    <div
+      className={clsx(
+        'flex flex-col justify-between items-center w-[6.25rem] h-full pb-8 bg-[#0B1327]',
+        window.electron.process.platform === 'darwin' ? 'pt-14' : 'pt-8'
+      )}
+    >
       {/* Logo */}
       <div className="flex flex-col items-center">
         <Logo size={32} />

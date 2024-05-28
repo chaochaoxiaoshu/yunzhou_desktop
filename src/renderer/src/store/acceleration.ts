@@ -1,7 +1,5 @@
 import { create } from 'zustand'
-
 import sg from '@renderer/assets/images/sg.png'
-// import us from '@renderer/assets/images/us.png'
 
 export const allRoutes: AccelerationRoute[] = [
   {

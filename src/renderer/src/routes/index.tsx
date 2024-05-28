@@ -14,6 +14,7 @@ import dashedF from '@renderer/assets/images/dashed_circle_f.png'
 import dashedI from '@renderer/assets/images/dashed_circle_f.png'
 import airplaneIcon from '@renderer/assets/images/icon_airplane.png'
 import autoIcon from '@renderer/assets/images/icon_auto_h.png'
+import { withAuthGuard } from '@renderer/helpers/withAuthGuard'
 
 export const Route = createFileRoute('/')({
   component: Index
@@ -24,7 +25,7 @@ export function Index(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const handleSelectRoute = (): void => {
+  const handleSelectRoute = withAuthGuard((): void => {
     if (accelerationStore.status === AccelerationStatus.connected) {
       toast({
         title: '提示',
@@ -33,10 +34,12 @@ export function Index(): JSX.Element {
       return
     }
     navigate({ to: '/route-selection' })
-  }
-  const handleSelectMode = (): void => {
+  })
+
+  const handleSelectMode = withAuthGuard((): void => {
     // navigate({ to: '/mode-selection' })
-  }
+  })
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-none">
@@ -75,14 +78,14 @@ export function Index(): JSX.Element {
 function AccelerationButton(): JSX.Element {
   const acceletaionStore = useAccelerationStore()
 
-  const handleSwitch = (): void => {
+  const handleSwitch = withAuthGuard((): void => {
     if (acceletaionStore.status === AccelerationStatus.connecting) return
     if (acceletaionStore.status === AccelerationStatus.disconnected) {
       acceletaionStore.start(acceletaionStore.route.configNames[acceletaionStore.subRouteIndex])
     } else {
       acceletaionStore.end()
     }
-  }
+  })
 
   const buttonLabel = (): string => {
     const labels = {

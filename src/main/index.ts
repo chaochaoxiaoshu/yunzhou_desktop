@@ -15,10 +15,18 @@ function createWindow(): void {
     maxHeight: 625,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    // ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
+    titleBarStyle: 'hiddenInset',
+    trafficLightPosition: { x: 23, y: 16 },
+    titleBarOverlay: {
+      symbolColor: '#ffffff',
+      height: 56
+    },
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      webSecurity: false
     }
   })
 
