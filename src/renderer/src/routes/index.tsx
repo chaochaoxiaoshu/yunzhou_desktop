@@ -37,7 +37,7 @@ export function Index(): JSX.Element {
   })
 
   const handleSelectMode = withAuthGuard((): void => {
-    // navigate({ to: '/mode-selection' })
+    navigate({ to: '/mode-selection' })
   })
 
   return (
@@ -46,7 +46,7 @@ export function Index(): JSX.Element {
         <Titlebar />
       </div>
       <div className="flex-auto">
-        <div className="flex flex-col justify-center items-center py-[3.125rem]">
+        <div className="flex flex-col justify-center items-center h-full">
           <AccelerationButton />
           <Spacer height={44} />
           <div className="flex justify-center items-center">

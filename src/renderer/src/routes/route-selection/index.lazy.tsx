@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TabBar from '@renderer/components/tab-bar'
 import Titlebar from '@renderer/components/titlebar'
 import { Checkbox } from '@renderer/components/ui/checkbox'
@@ -11,7 +11,7 @@ import {
   AccordionTrigger
 } from '@renderer/components/ui/accordion'
 import { AccelerationRoute, allRoutes, useAccelerationStore } from '@renderer/store/acceleration'
-import { MoveRight } from 'lucide-react'
+import { Loader2, MoveRight } from 'lucide-react'
 import crownIcon from '@renderer/assets/images/crown.png'
 
 export const Route = createLazyFileRoute('/route-selection/')({
@@ -21,6 +21,23 @@ export const Route = createLazyFileRoute('/route-selection/')({
 function RouteSelection(): JSX.Element {
   const [selection, setSelection] = useState(0)
   const accelerationStore = useAccelerationStore()
+
+  const [latency, setLatency] = useState<Record<number, number[]>>([])
+
+  const testLatency = async (): Promise<Record<number, number[]>> => {
+    const configNames: Record<number, string[]> = {}
+    allRoutes.forEach((route) => (configNames[route.id] = route.configNames))
+    const result = await window.electron.ipcRenderer.invoke('testLatency', configNames)
+    return result as Record<number, number[]>
+  }
+
+  useEffect(() => {
+    testLatency().then((res) => {
+      console.log(res)
+      setLatency(res)
+    })
+  }, [])
+
   return (
     <div className="flex flex-col h-full">
       {/* 标题栏 */}
@@ -38,9 +55,9 @@ function RouteSelection(): JSX.Element {
               onChange={(index) => setSelection(index)}
             />
             <div className="flex items-center">
-              <Checkbox className="border-white rounded-full" />
+              <Checkbox id="autoSelect" className="border-white rounded-full" />
               <Spacer width={8} />
-              <div>自动选择</div>
+              <label htmlFor="autoSelect">自动选择</label>
             </div>
           </div>
           <Spacer height={16} />
@@ -57,6 +74,7 @@ function RouteSelection(): JSX.Element {
                   <RouteItem
                     key={index}
                     route={route}
+                    latencyList={latency[route.id]}
                     onSelect={(route, index) => accelerationStore.updateRoute(route, index)}
                   />
                 )
@@ -71,11 +89,12 @@ function RouteSelection(): JSX.Element {
 
 interface RouteItemProps {
   route: AccelerationRoute
+  latencyList: number[]
   onSelect?: (route: AccelerationRoute, subRouteIndex: number) => void
 }
 
 function RouteItem(props: RouteItemProps): JSX.Element {
-  const { route, onSelect } = props
+  const { route, latencyList, onSelect } = props
   const accelerationStore = useAccelerationStore()
   return (
     <AccordionItem value={route.description} className="border-b-transparent">
@@ -118,6 +137,12 @@ function RouteItem(props: RouteItemProps): JSX.Element {
                 <Spacer width={8} />
                 <div>专线 {index + 1}</div>
                 <div className="flex-auto" />
+                {latencyList ? (
+                  <div className="text-emerald-500">{latencyList[index]}ms</div>
+                ) : (
+                  <Loader2 size={16} className="animate-spin" />
+                )}
+                <Spacer width={12} />
                 <Checkbox
                   checked={accelerationStore.subRouteIndex === index}
                   className="w-5 h-5 rounded-full border-white border-[2px] font-bold"

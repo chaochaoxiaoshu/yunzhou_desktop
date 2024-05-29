@@ -1,4 +1,4 @@
-import { useLoginFormVisibility } from '@renderer/routes/__root'
+import { useLoginFormVisibility } from '@renderer/components/with-login-form'
 import { useUserInfoStore } from '@renderer/store/user-info'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

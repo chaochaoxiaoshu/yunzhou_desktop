@@ -1,6 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { app } from 'electron'
 import path from 'path'
+import axios from 'axios'
 
 export class XrayManager {
   private static instance: XrayManager
@@ -40,68 +41,64 @@ export class XrayManager {
       : path.join(basePath, 'xray_windows', `${configName}.json`)
   }
 
-  startXray(configName: string): void {
+  async startXray(configName: string): Promise<void> {
     if (process.platform === 'darwin') {
-      this.startXrayOnMacOS(configName)
+      await this.startXrayOnMacOS(configName)
     } else if (process.platform === 'win32') {
-      this.startXrayOnWindows(configName)
+      await this.startXrayOnWindows(configName)
     }
   }
 
-  private startXrayOnMacOS(configName: string): void {
-    spawn('/usr/sbin/networksetup', ['-setwebproxy', 'WI-FI', '127.0.0.1', '24511'])
-    spawn('/usr/sbin/networksetup', ['-setsecurewebproxy', 'WI-FI', '127.0.0.1', '24511'])
-    spawn('/usr/sbin/networksetup', ['-setsocksfirewallproxy', 'WI-FI', '127.0.0.1', '24512'])
+  private startXrayOnMacOS(configName: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      spawn('/usr/sbin/networksetup', ['-setwebproxy', 'WI-FI', '127.0.0.1', '24511'])
+      spawn('/usr/sbin/networksetup', ['-setsecurewebproxy', 'WI-FI', '127.0.0.1', '24511'])
+      spawn('/usr/sbin/networksetup', ['-setsocksfirewallproxy', 'WI-FI', '127.0.0.1', '24512'])
 
-    const bat = spawn(this.getXrayPath(), ['-c', this.getConfigPath(configName)])
+      const bat = spawn(this.getXrayPath(), ['-c', this.getConfigPath(configName)])
 
-    bat.stdout.on('data', (data) => {
-      console.log(data)
+      this.childProcess = bat
+
+      bat.stdout.on('data', (data) => {
+        console.log(data)
+        resolve()
+      })
+      bat.stdout.on('error', () => {
+        reject(`Failed to start Xray with config ${configName}`)
+      })
     })
-
-    bat.stdout.on('error', (err) => {
-      console.log(err)
-    })
-
-    bat.on('exit', (code) => {
-      console.log(code)
-    })
-
-    this.childProcess = bat
   }
 
-  private startXrayOnWindows(configName: string): void {
-    spawn('powershell', [
-      'Set-ItemProperty -Path',
-      '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
-      '-Name ProxyServer -Value 127.0.0.1:24511'
-    ])
-    spawn('powershell', [
-      'Set-ItemProperty -Path',
-      '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
-      '-Name ProxyOverride -Value '
-    ])
-    spawn('powershell', [
-      'Set-ItemProperty -Path',
-      '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
-      '-Name ProxyEnable -Value 1'
-    ])
+  private startXrayOnWindows(configName: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      spawn('powershell', [
+        'Set-ItemProperty -Path',
+        '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
+        '-Name ProxyServer -Value 127.0.0.1:24511'
+      ])
+      spawn('powershell', [
+        'Set-ItemProperty -Path',
+        '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
+        '-Name ProxyOverride -Value '
+      ])
+      spawn('powershell', [
+        'Set-ItemProperty -Path',
+        '"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"',
+        '-Name ProxyEnable -Value 1'
+      ])
 
-    const bat = spawn(this.getXrayPath(), ['-c', this.getConfigPath(configName)])
+      const bat = spawn(this.getXrayPath(), ['-c', this.getConfigPath(configName)])
 
-    bat.stdout.on('data', (data) => {
-      console.log(data)
+      this.childProcess = bat
+
+      bat.stdout.on('data', (data) => {
+        console.log(data)
+        resolve()
+      })
+      bat.stdout.on('error', () => {
+        reject(`Failed to start Xray with config ${configName}`)
+      })
     })
-
-    bat.stdout.on('error', (err) => {
-      console.log(err)
-    })
-
-    bat.on('exit', (code) => {
-      console.log(code)
-    })
-
-    this.childProcess = bat
   }
 
   endXray(): void {
@@ -118,6 +115,7 @@ export class XrayManager {
     spawn('/usr/sbin/networksetup', ['-setsocksfirewallproxystate', 'WI-FI', 'off'])
     if (!this.childProcess) return
     this.childProcess.kill()
+    this.childProcess = undefined
   }
 
   private endXrayOnWindows(): void {
@@ -128,5 +126,41 @@ export class XrayManager {
     ])
     if (!this.childProcess) return
     this.childProcess.kill()
+    this.childProcess = undefined
+  }
+
+  /**
+   * 根据给定的配置，测算延迟
+   *
+   * @example
+   * const configNames = {
+   *   0: ['vless_usa', 'vless_sg'],
+   *   1: ['vless_k', 'vless_v']
+   * }
+   * const result = await XrayManager.shared.testLatency(configNames)
+   * // { 0: [123, 110], 1: [89, 105] }
+   *
+   * @param configNames key 为线路 id，value 为子线路列表对应的配置名称数组
+   * @returns key 为线路 id，value 为子线路列表对应的延迟
+   */
+  async testLatency(configNames: Record<number, string[]>): Promise<Record<number, number[]>> {
+    const result: Record<number, number[]> = []
+    for (const key in configNames) {
+      const numKey = Number(key)
+      const configNameList = configNames[numKey]
+      for (const configName of configNameList) {
+        await this.startXray(configName)
+        const start = Date.now()
+        await axios.get('https://www.baidu.com')
+        const latency = Date.now() - start
+        if (result[numKey]) {
+          result[numKey].push(latency)
+        } else {
+          result[numKey] = [latency]
+        }
+        this.endXray()
+      }
+    }
+    return result
   }
 }

@@ -12,8 +12,6 @@ function createWindow(): void {
     height: 625,
     minWidth: 1000,
     minHeight: 625,
-    maxWidth: 1000,
-    maxHeight: 625,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -63,9 +61,16 @@ app.whenReady().then(() => {
   })
 
   // 在此 handle 来自渲染进程的调用
-  ipcMain.handle('startXray', (_, configName) => XrayManager.shared.startXray(configName))
+  ipcMain.handle(
+    'startXray',
+    async (_, configName) => await XrayManager.shared.startXray(configName)
+  )
   ipcMain.handle('endXray', () => XrayManager.shared.endXray())
   ipcMain.handle('getClientInfo', () => getClientInfo())
+  ipcMain.handle(
+    'testLatency',
+    async (_, configNames) => await XrayManager.shared.testLatency(configNames)
+  )
 
   createWindow()
 

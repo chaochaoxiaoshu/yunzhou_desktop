@@ -20,7 +20,7 @@ import { AxiosResponse, AxiosError } from 'axios'
 import { registerAPI } from '@renderer/api/register'
 import { loginAPI } from '@renderer/api/login'
 import { useUserInfoStore } from '@renderer/store/user-info'
-import { useLoginFormVisibility } from '@renderer/routes/__root'
+import { useLoginFormVisibility } from '@renderer/components/with-login-form'
 import CountdownButton from './countdown-button'
 import { ClientInfo } from '@renderer/types'
 

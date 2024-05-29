@@ -3,7 +3,7 @@ import Spacer from './spacer'
 // import { Sparkles } from 'lucide-react'
 import { useUserInfoStore } from '@renderer/store/user-info'
 import { Button } from './ui/button'
-import { useLoginFormVisibility } from '@renderer/routes/__root'
+import { useLoginFormVisibility } from '@renderer/components/with-login-form'
 import { useCallback } from 'react'
 
 export default function ProfileItem(): JSX.Element {

@@ -4,6 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
+import WithLoginForm from './components/with-login-form'
 
 const router = createRouter({ routeTree })
 
@@ -19,7 +20,9 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <WithLoginForm>
+        <RouterProvider router={router} />
+      </WithLoginForm>
     </React.StrictMode>
   )
 }

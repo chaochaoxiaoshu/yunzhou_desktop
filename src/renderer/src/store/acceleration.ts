@@ -5,6 +5,7 @@ import { useUserInfoStore } from './user-info'
 
 export const allRoutes: AccelerationRoute[] = [
   {
+    id: 0,
     icon: sg,
     from: '亚太',
     to: '中国大陆',
@@ -37,25 +38,23 @@ export const useAccelerationStore = create<AccelerationStore>((set) => ({
   // 当前选择的加速模式
   mode: AccelerationMode.global,
   // 启动，根据指定配置名称，启动 Xray 进程，向服务器发送上线请求，并切换 UI 状态
-  start: (configName: string): void => {
+  start: async (configName: string): Promise<void> => {
     set(() => ({ status: AccelerationStatus.connecting }))
-    window.electron.ipcRenderer.invoke('startXray', configName)
+    await window.electron.ipcRenderer.invoke('startXray', configName)
+    set(() => ({ status: AccelerationStatus.connected }))
     toggleConnectStatusAPI({
       uuid: useUserInfoStore.getState().uuid,
       type: ConnectStatus.上线
     })
-    setTimeout(() => {
-      set(() => ({ status: AccelerationStatus.connected }))
-    }, 1000)
   },
   // 停止，杀死 Xray 进程，向服务器发送下线请求，并切换 UI 状态
   end: (): void => {
     window.electron.ipcRenderer.invoke('endXray')
+    set(() => ({ status: AccelerationStatus.disconnected }))
     toggleConnectStatusAPI({
       uuid: useUserInfoStore.getState().uuid,
       type: ConnectStatus.下线
     })
-    set(() => ({ status: AccelerationStatus.disconnected }))
   },
   // 更新线路选择
   updateRoute: (route: AccelerationRoute, subRouteIndex: number): void => {
@@ -113,6 +112,7 @@ export function getAccelerationModeDesc(mode: AccelerationMode): string {
 }
 
 export interface AccelerationRoute {
+  id: number
   icon: string
   title?: string
   from?: string

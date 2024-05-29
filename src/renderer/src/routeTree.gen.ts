@@ -20,6 +20,8 @@ import { Route as IndexImport } from './routes/index'
 const RouteSelectionIndexLazyImport = createFileRoute('/route-selection/')()
 const PurchaseIndexLazyImport = createFileRoute('/purchase/')()
 const ProfileIndexLazyImport = createFileRoute('/profile/')()
+const ModeSelectionIndexLazyImport = createFileRoute('/mode-selection/')()
+const ProfileAboutLazyImport = createFileRoute('/profile/about')()
 
 // Create/Update Routes
 
@@ -47,6 +49,18 @@ const ProfileIndexLazyRoute = ProfileIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/profile/index.lazy').then((d) => d.Route))
 
+const ModeSelectionIndexLazyRoute = ModeSelectionIndexLazyImport.update({
+  path: '/mode-selection/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/mode-selection/index.lazy').then((d) => d.Route),
+)
+
+const ProfileAboutLazyRoute = ProfileAboutLazyImport.update({
+  path: '/profile/about',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/profile/about.lazy').then((d) => d.Route))
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -56,6 +70,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/profile/about': {
+      id: '/profile/about'
+      path: '/profile/about'
+      fullPath: '/profile/about'
+      preLoaderRoute: typeof ProfileAboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/mode-selection/': {
+      id: '/mode-selection/'
+      path: '/mode-selection'
+      fullPath: '/mode-selection'
+      preLoaderRoute: typeof ModeSelectionIndexLazyImport
       parentRoute: typeof rootRoute
     }
     '/profile/': {
@@ -86,6 +114,8 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
+  ProfileAboutLazyRoute,
+  ModeSelectionIndexLazyRoute,
   ProfileIndexLazyRoute,
   PurchaseIndexLazyRoute,
   RouteSelectionIndexLazyRoute,
@@ -100,6 +130,8 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/profile/about",
+        "/mode-selection/",
         "/profile/",
         "/purchase/",
         "/route-selection/"
@@ -107,6 +139,12 @@ export const routeTree = rootRoute.addChildren({
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/profile/about": {
+      "filePath": "profile/about.lazy.tsx"
+    },
+    "/mode-selection/": {
+      "filePath": "mode-selection/index.lazy.tsx"
     },
     "/profile/": {
       "filePath": "profile/index.lazy.tsx"
