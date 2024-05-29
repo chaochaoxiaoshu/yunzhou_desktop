@@ -35,6 +35,7 @@ export const useLoginFormVisibility = (): LoginFormVisibilityContextType => {
 export const Route = createRootRoute({
   component: () => {
     const [isOpenLoginFormDialog, setIsOpenLoginFormDialog] = useState(false)
+
     return (
       <LoginFormVisibilityContext.Provider
         value={{ isOpenLoginFormDialog, setIsOpenLoginFormDialog }}

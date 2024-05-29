@@ -192,6 +192,7 @@ function ResetPasswordForm(props: ResetPasswordFormProps): JSX.Element {
             <FormItem>
               <FormControl>
                 <Input
+                  type="password"
                   placeholder="请输入新密码"
                   {...field}
                   className="border-none h-12 bg-[#EEEEEE] text-base placeholder:text-[#BBBBBB] placeholder:text-base rounded-md"

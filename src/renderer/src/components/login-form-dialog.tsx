@@ -22,6 +22,7 @@ import { loginAPI } from '@renderer/api/login'
 import { useUserInfoStore } from '@renderer/store/user-info'
 import { useLoginFormVisibility } from '@renderer/routes/__root'
 import CountdownButton from './countdown-button'
+import { ClientInfo } from '@renderer/types'
 
 interface LoginFormDialogProps {
   open: boolean
@@ -134,9 +135,11 @@ function LoginForm(props: LoginFormProps): JSX.Element {
     async (values: z.infer<typeof formSchema>): Promise<void> => {
       try {
         setLoading(true)
+        const clientInfo = (await window.electron.ipcRenderer.invoke('getClientInfo')) as ClientInfo
         const res = await loginAPI({
           account: values.account,
-          password: values.password
+          password: values.password,
+          client_info: clientInfo
         })
         userInfoStore.updateToken(res.data.token)
         userInfoStore.updateMemberId(res.data.data.memberId!)
@@ -144,6 +147,7 @@ function LoginForm(props: LoginFormProps): JSX.Element {
         setLoading(false)
         setIsOpenLoginFormDialog(false)
       } catch (error) {
+        setLoading(false)
         toast({
           title: '错误',
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,7 +185,8 @@ function LoginForm(props: LoginFormProps): JSX.Element {
             <FormItem>
               <FormControl>
                 <Input
-                  placeholder="请输入新密码"
+                  type="password"
+                  placeholder="请输入密码"
                   {...field}
                   className="border-none h-12 bg-[#EEEEEE] text-base placeholder:text-[#BBBBBB] placeholder:text-base rounded-md"
                 />
@@ -343,12 +348,14 @@ function RegisterForm(props: RegisterFormProps): JSX.Element {
     async (values: z.infer<typeof formSchema>): Promise<void> => {
       try {
         setLoading(true)
+        const clientInfo = (await window.electron.ipcRenderer.invoke('getClientInfo')) as ClientInfo
         const res = await registerAPI({
           account: values.account,
           password: values.password,
           username: Date.now().toString(),
           captcha: values.captcha,
-          captcha_id: captchaId
+          captcha_id: captchaId,
+          client_info: clientInfo
         })
         userInfoStore.updateToken(res.data.token)
         userInfoStore.updateMemberId(res.data.data.memberId!)
@@ -356,6 +363,7 @@ function RegisterForm(props: RegisterFormProps): JSX.Element {
         setLoading(false)
         setIsOpenLoginFormDialog(false)
       } catch (error) {
+        setLoading(false)
         toast({
           title: '错误',
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -414,6 +422,7 @@ function RegisterForm(props: RegisterFormProps): JSX.Element {
             <FormItem>
               <FormControl>
                 <Input
+                  type="password"
                   placeholder="请输入新密码"
                   {...field}
                   className="border-none h-12 bg-[#EEEEEE] text-base placeholder:text-[#BBBBBB] placeholder:text-base rounded-md"

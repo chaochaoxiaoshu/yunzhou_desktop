@@ -45,8 +45,8 @@ export default function Titlebar(props: TitlebarProps): JSX.Element {
           <TitlebarButton icon={contactIcon} />
           <TitlebarButton icon={emailIcon} />
           <TitlebarButton icon={settingsIcon} />
+          {window.electron.process.platform === 'win32' && <Spacer width={120} />}
         </div>
-        {window.electron.process.platform === 'win32' && <Spacer width={150} />}
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { XrayManager } from './xray'
+import { getClientInfo } from './helpers/get-client-info'
 
 function createWindow(): void {
   // Create the browser window.
@@ -15,8 +16,7 @@ function createWindow(): void {
     maxHeight: 625,
     show: false,
     autoHideMenuBar: true,
-    // ...(process.platform === 'linux' ? { icon } : {}),
-    icon,
+    ...(process.platform === 'linux' ? { icon } : {}),
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 23, y: 16 },
     titleBarOverlay: {
@@ -65,6 +65,7 @@ app.whenReady().then(() => {
   // 在此 handle 来自渲染进程的调用
   ipcMain.handle('startXray', (_, configName) => XrayManager.shared.startXray(configName))
   ipcMain.handle('endXray', () => XrayManager.shared.endXray())
+  ipcMain.handle('getClientInfo', () => getClientInfo())
 
   createWindow()
 
@@ -86,6 +87,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
