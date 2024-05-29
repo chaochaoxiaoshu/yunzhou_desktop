@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: yunzhou_electron
+appId: com.yunzhou.desktop
+productName: 云舟加速器
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: yunzhou_electron
+  executableName: ${name}_v${version}
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -27,7 +27,7 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}_v${version}.${ext}
 linux:
   target:
     - AppImage
